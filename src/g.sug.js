@@ -1,4 +1,4 @@
-﻿/*
+/*
 author: 斯人
 QQ: 103024979
 Email: leecade@163.com
@@ -62,7 +62,7 @@ update:
 
 var SPACE = " ",
 	NULL = null,
-	
+
 	//IE8报错
 	//CLASSLIST = !!(WIN.Element && Element.prototype.hasOwnProperty("classList")),
 	CLASSLIST = document.documentElement.classList !== undef,
@@ -103,7 +103,7 @@ namespace = function(s) {
 		context = window,
 		i = 0,
 		p;
-	
+
 	//兼容处理形如"baidu.sug.xx"的回调方法名
 	if(len > 1) {
 		for(; i < len - 1; i++){
@@ -154,20 +154,20 @@ getStyle = isIE ? function(el, style) {
 
 //construct
 _sug = function(el, o) {
-	
+
 	//ignore "new"
 	if(!(this instanceof _sug)) return new _sug(el, o);
-	
+
 	var that = this;
-	
+
 	//"id" or el
 	that.el = el + "" === el ? DOC.getElementById(el) : el;
 	//null/undefind
 	if(!that.el) return;
-	
+
 	//default arguments
 	that.o = {
-		
+
 		//样式接口及默认样式名
 		classNameWrap: o.classNameWrap || "sug-wrap",			//suggest内容面板className
 		classNameQuery: o.classNameQuery,						//查询词高亮样式，如不定义则不增加span标签（避免和回调数据重复定义）
@@ -176,39 +176,39 @@ _sug = function(el, o) {
 		classNameClose: o.classNameClose || "sug-close",		//关闭按钮样式
 		classNameShim: o.classNameShim || "sug-shim",			//ie6下shim样式
 		locAbs: o.locAbs || false,								//提示层是否绝对定位（默认相对于input外框定位）
-		
+
 		pressDelay: o.pressDelay === undef ? 3 : o.pressDelay,	//上/下键选择的延迟程度，false||0||null ==> 禁止干涉（浏览器默认速度很快，难以准确选择）, 1 ==> 禁止按住连续选择（只能通过多次敲击进行选择），Num ==> 数字(>1)越大，响应越慢，未配置该参数 ==> 3
 		autoFocus: o.autoFocus || false,						//自动获取焦点
 		delay: o.delay || 200,									//调整触发相应速度
 		n: o.n || 10,											//最多显示列表数
 		t: o.t || true,											//请求时是否自动附加时间戳
-		
+
 		//数据接口配置
 		autoCompleteData: o.autoCompleteData || false,			//autoComplete模式（数组），优先
 		//or
 		url: o.url || false,									//数据url
 		charset: o.charset,										//未配置则不设置script节点该属性
-		
+
 		//回调接口配置，根据返回数据形式任选一种：
 		callbackFn: o.callbackFn || false,						//回调函数名，允许链式字符串
 		//or
 		callbackName: o.callbackName || false,					//回调变量名，允许链式字符串
-		
-		
+
+
 		//配置返回数据中的填充内容，根据数据格式任选一种:
 		callbackDataKey: o.callbackDataKey || false,			//json（如{s: [$1,$2,$3]}，这里callbackDataKey为"s"）
 		//or
 		callbackDataNum: o.callbackDataNum || false,			//array（如[s,[$1,$2,$3]]，这里callbackDataNum为1）
-		
-		
+
+
 		requestQuery: o.requestQuery || false,					//数据请求API接口中的查询参数
 		requestParas: o.requestParas || {},						//请求数据时的自定义参数
-		
-		
+
+
 		//是否自动提交表单
 		noSubmit: o.noSubmit || false,						//默认为true
-		
-		
+
+
 		//注册事件
 		onSelect: o.onSelect,		//鼠标点选或回车提交时（在表单提交前）
 		onShow: o.onShow,			//提示层显示时
@@ -216,15 +216,15 @@ _sug = function(el, o) {
 		onRequest: o.onRequest,		//*每次请求前（用于修正url）
 		onSucess: o.onSucess,		//每次请求数据成功时
 		onError: o.onError,			//每次请求数据失败时
-		
+
 		customUrl: o.customUrl || false,		//增加一个自定义拼装请求URL和参数的接口
-		
+
 		templ: o.templ || false									//暴露的自定义模板
 	}
-	
+
 	//el(input)'s wrap
 	that.wrap = that.el.parentNode;
-	
+
 	//初始化
 	that.init();
 },
@@ -233,43 +233,43 @@ _sug = function(el, o) {
 _ = _sug.prototype;
 
 _.init = function() {
-	
+
 	var that = this,
 		o = that.o;
-	
+
 	//init layout
 	that.layoutInit();
-	
+
 	that.reset();
-	
+
 	//init input handle
 	that.inputHandle();
-	
+
 	//if need autoFocus
 	o.autoFocus && setTimeout(function() {
 		that.el.focus();
 	}, 16);
-	
+
 	//autoComplete模式
 	if(o.autoCompleteData) return;
-	
+
 	var callbackFn = o.callbackFn,
 		context = namespace(callbackFn, true),
 		ret = callbackFn.split("."),
 		lastName = ret.pop();
-		
+
 	//common callback(callbackFn || callbackName)
 	that.callback = function(data) {
-		
+
 		data = data || {};
-		
+
 		var self = arguments.callee;
-		
+
 		//callback's multiton pattern
 		that = callbackFn && self.repeat ? self.context || that : that;
-		
+
 		that.o.onSucess && that.o.onSucess.call(that);
-		
+
 		/*
 		if(!data) {
 			that.hide(1);
@@ -277,60 +277,60 @@ _.init = function() {
 			return;
 		}
 		*/
-		
+
 		var key = that.o.callbackDataKey || that.o.callbackDataNum,
-		
+
 			//callback([a1, a2, a3])
 			_data = key ? data[key] : data;
-		
+
 		if(!_data || !_data.length) {
 			that.hide(1);
-			
+
 			//if nondata reset isHide state
 			that.isHide = false;
 			return;
 		}
-		
+
 		that.fill(data, that.q);
 		that.show();
-		
+
 		//cache data
 		that.cache[that.q] = data;
 	};
-	
+
 	//mark the same name callback
 	if(context[lastName]) context[lastName].repeat = true;
-	
+
 	//callbackFn refer to callback
 	else if(callbackFn) context[lastName] = that.callback;
 }
 
 //reset
 _.reset = function(o) {
-	
+
 	var that = this,
 		k;
-		
+
 	for(k in o) that.o[k] = o[k];
-	
+
 	//cache
 	that.cache = {};
-		
+
 	//cache last query
 	that.q = "";
-	
+
 	//current selected item(synchronize keyboard and mouse)
 	that.s = NULL;
-	
+
 	//current selected item's index(update when content change)
 	that.i = -1;
-	
+
 	//timer
 	that.inputTimer();
-	
+
 	//重置隐藏状态，否则切换tab会认为isHide
 	that.isHide = false;
-	
+
 	//隐藏
 	that.hide(1);
 }
@@ -339,15 +339,15 @@ _.layoutInit = function() {
 	var that = this,
 		o = that.o,
 		wrap = o.locAbs ? DOC.body : that.wrap,
-		
+
 		//sug layer's wrap
 		sugWrap = that.sugWrap = DOC.createElement("div");
-	
+
 	that.el.setAttribute("autocomplete", "off");
-	
+
 	//fix IE6'z-index bug
 	if(isIE6) {
-		
+
 		//shim's height unknown
 		var shim = that.shim = sugWrap.appendChild(DOC.createElement("iframe"));
 		shim.src = "about:blank";
@@ -359,17 +359,17 @@ _.layoutInit = function() {
 		that.content = sugWrap;
 	}
 	addClass(sugWrap, o.classNameWrap);
-	
+
 	//set the input's prentNode's position if "locAbs" is true and it's "position" isn't "absolute"
 	!o.locAbs && getStyle(wrap, "position") === "static" && (wrap.style.position = "relative");
-	
+
 	wrap.appendChild(sugWrap);
 }
 
 //显示
 _.show = function() {
 	this.sugWrap.style.display = "";
-	
+
 	//that.isHide = false;
 	//注册onShow
 	this.o.onShow && this.o.onShow.call(this);
@@ -380,17 +380,17 @@ _.show = function() {
 _.hide = function(type) {
 	var that = this;
 	that.sugWrap.style.display = "none";
-	
+
 	//updata that.q,or (a——andiod) after submit,input a,can't triggers sug
   	that.q = that.el.value;
-	
+
 	if(type != 2) {
 		that.s = NULL;
 		that.i = -1;
 	}
-	
+
 	type == 1 && that.fill();
-	
+
 	//注册onHide
 	that.o.onHide && that.o.onHide.call(that);
 }
@@ -408,42 +408,42 @@ _.holdFocus = function(el, e) {
 
 //inputTimer, 1||true ==> start, 0||false||null ==> stop
 _.inputTimer = function(n) {
-	
+
 	var that = this,
 		el = that.el,
 		t = that.t,
 		value;
-	
+
 	//start
 	if(n) {
 		if(t) return;
 		that.t = setInterval(function() {
 			value = el.value;
-			
+
 			//input值为空直接隐藏不触发更新
 			if(!value.trim()) {
 				that.hide(1);
-				
+
 				that.q = value;
 				return;
 			}
-			
+
 			//输入值与上次更新值不同时触发更新（包含空格）
 			if(value !== that.q) {
 				that.updata(value);
 			}
-			
-			
+
+
 			/*FF监控bug
 			//NUL ==> hide
 			if(!value.trim()) {
 				that.hide(1);
-				
-				
+
+
 				//当输入 ==> 清空 然后切换tab时会出现bug，临时修复
 				clearInterval(that.t);
 				that.t = 0;
-				
+
 				//记录当前值
 				that.q = value;
 				return;
@@ -455,7 +455,7 @@ _.inputTimer = function(n) {
 			*/
 		}, that.o.delay);
 	}
-	
+
 	//stop
 	else {
 		t && clearInterval(that.t);
@@ -481,7 +481,7 @@ _.matchEl = function(el, wrap, fun) {
 
 _.submitForm = function() {
 	var form = this.el.form;
-	
+
 	if(form.onsubmit) {
 		form.onsubmit();
 	} else {
@@ -492,17 +492,17 @@ _.submitForm = function() {
 
 //move by keydown
 _.keydownMove = function(k) {
-	
+
 	var that = this,
 		ol = that.sugWrap.getElementsByTagName("OL")[0];
-		
+
 		//console.log(that.i)
 	if(!ol) return;
 	if(that.isHide) {
 		that.isHide = false;
 		return;
 	}
-	
+
 	var list = ol.getElementsByTagName("LI"),
 		l = list.length,
 		el = that.el,
@@ -513,30 +513,30 @@ _.keydownMove = function(k) {
 		li;
 	if(s) {
 		removeClass(s, classNameSelect);
-		
+
 		//updata index
 		that.i = that.getIndex(s, list);
-		
+
 		//置空当前选中项
 		that.s = NULL;
 	}
-	
+
 	//fix
 	that.i === undef && (that.index = -1);
 	that.i !== -1 && removeClass(list[that.i], classNameSelect);
-	
+
 	//根据键值判断是向上/下选择
 	if(k === 40) {
 		that.i++;
 	} else if(k === 38){
 		that.i--;
 	}
-	
+
 	//UP when init
 	if(that.i === -2) {
 		that.i = l - 1;
 	}
-	
+
 	//above
 	else if(that.i === l){
 		el.value = q;
@@ -545,9 +545,9 @@ _.keydownMove = function(k) {
 	else if(that.i === -1) {
 		el.value = q;
 	}
-	
+
 	if(that.i !== -1 && that.i !== l) {
-		
+
 		li = list[that.i];
 		addClass(li, classNameSelect);
 		!o.autoCompleteData && (el.value = li.getAttribute("q"));
@@ -565,11 +565,11 @@ _.inputHandle = function() {
 		autoCompleteData = o.autoCompleteData,
 		pressCount = 0,
 		k;
-		
+
 	el.onkeydown = function(e) {
 		e = e || window.event;
 		k = e.keyCode;
-		
+
 		// ESC key,hide and reset input value
 		if(k === 27) {
 			that.hide(2);
@@ -577,14 +577,14 @@ _.inputHandle = function() {
 			sugWrap.getElementsByTagName("ol")[0] && (that.isHide = true);
 			!autoCompleteData && (el.value = that.q);
 			that.inputTimer();
-			
+
 			//IE8也会清空，为保证策略一致，全屏蔽
 			//fix IE6 ESC clear input'value
 			//if(isIE6) return false;
-			
+
 			return false;
 		}
-		
+
 		// direction key(PgUp, PgDn, End, Home, Left, Up, Right, Down)
 		else if(k > 32 && k < 41) {
 			//change input's focus when value is null because maybe autoFocus
@@ -592,7 +592,7 @@ _.inputHandle = function() {
 			if (!el.value && sugWrap.style.display === "none") {
 				el.blur();
 			}
-			
+
 			//DOWN/UP key
 			else if(k === 40 || k === 38) {
 				if(!o.pressDelay || pressCount++ === 0) {
@@ -603,22 +603,22 @@ _.inputHandle = function() {
 				} else if(pressCount === o.pressDelay) {
 					pressCount = 0;
 				}
-				
+
 				//stop nonIE default event,like:chrome press UP key will set cursor position to the first
 				!isIE && e.preventDefault();
 			}
 		}
-		
+
 		// ENTER key
 		else if(k === 13) {
 			that.inputTimer();
-			
+
 			//保持隐藏策略
 			that.hide(2);
-			
+
 			//onSelect
 			o.onSelect && o.onSelect.call(that);
-		
+
 			//增加autoCompleteData模式
 			if(autoCompleteData) {
 				/*
@@ -626,95 +626,95 @@ _.inputHandle = function() {
 				el.value = list[that.index].getAttribute("q");
 				return false;
 				*/
-				
+
 				el.value = that.s ? that.s.getAttribute("q") : "";
 				return false;
 			}
-			
+
 			//noSubmit
 			if(o.noSubmit) return false;
 		}
-		
+
 		//block some comb key,like (Alt, Ctrl, Tab)
 		else if(k > 8 && k < 19) {
-			
+
 			//chrome press ALT will lose focus
 			//排除tab键，允许脱离焦点
 			k !==9 &&that.holdFocus(el, e);
 			return;
 		}
-		
+
 		//other keys
 		else {
 			that.inputTimer(1);
 		}
 	}
-	
+
 	on(el, "keyup", function() {
 		//reset pressCount
 		pressCount = 0;
 	})
-	
+
 	on(el, "blur", function() {
 		that.hide(2);
-		
+
 		//排除掉空数据，没想到更好的方法
 		sugWrap.getElementsByTagName("ol")[0] && (that.isHide = true);
 		that.inputTimer();
 	});
-	
+
 	bind(sugWrap, "mouseover", function() {
-		
+
 		//match the "li" tag
 		var li = that.matchEl(this, sugWrap, function() {
 			return this.tagName === "LI";
 		});
-		
+
 		if(!li) return;
 		that.s && removeClass(that.s, classNameSelect);
 		addClass(li, classNameSelect);
 		that.s = li;
 	});
-	
+
 	bind(sugWrap, "mouseout", function() {
 		var li = that.matchEl(this, sugWrap, function() {
 			return this.tagName === "LI";
 		});
 		this.tagName === "LI" && this !== li && removeClass(li, classNameSelect)
 	});
-	
+
 	on(sugWrap, "mousedown", function(e) {
 		that.inputTimer();
-		
+
 		//hold input's focus
 		that.holdFocus(el, e);
 	});
-	
+
 	bind(sugWrap, "mouseup", function(e) {
-		
+
 		var ol = sugWrap.getElementsByTagName("OL")[0],
 			li;
-		
+
 		//block the right mouse button
 		if(!ol || e.which && e.which > 2 || e.button && (e.button !== 1 && e.button !== 4)) return;
-		
+
 		hasClass(this, o.classNameClose) && that.hide();
-		
+
 		//match the "li" tag
 		li = that.matchEl(this, sugWrap, function() {
 			return this.tagName === "LI";
 		});
-		
+
 		if(!li) return;
-		
+
 		el.value = li.getAttribute("q");
 		that.hide();
 		that.inputTimer();
 		o.onSelect && o.onSelect.call(that);
-		
+
 		//updata index
 		that.i = that.getIndex(li, ol.getElementsByTagName("LI"));
-		
+
 		!o.autoCompleteData && !o.noSubmit && that.submitForm();
 	});
 }
@@ -724,26 +724,26 @@ _.inputHandle = function() {
 _.fill = function(data, q) {
 	var that = this,
 		content = that.content;
-		
+
 	if(arguments.length < 2) {
 		content.innerHTML = "";
 		return;
 	}
-	
+
 	var o = that.o,
 		templ = o.templ,
 		classNameQueryNull = o.classNameQueryNull,
 		classNameQuery = o.classNameQuery;
-		
+
 	this.content.innerHTML = templ ? templ.call(that, data, q) : function() {
-		
+
 		data = data[o.callbackDataKey || o.callbackDataNum] || [];
-		
+
 		var i = 0,
 			l = Math.min(data.length, o.n),
 			ret = [],
 			li;
-		
+
 		//与baidu策略保持一致
 		q = q.trim();
 		for(; i<l; i++) {
@@ -757,25 +757,25 @@ _.fill = function(data, q) {
 _.updata = function(q) {
 	var that = this,
 		data = that.o.autoCompleteData || that.cache[q];
-	
+
 	that.q = q;
 	that.i = -1;
 	that.isHide = false;	//updata isHide state
-	
+
 	//1.from autoCompleteData or cache
 	if(data !== undef) {
 		that.fill(data, q);
 		that.show();
-		return;	
+		return;
 	}
-	
+
 	//2.request
 	that.request(q);
 }
 
 //数据请求方法
 _.request = function(q) {
-	
+
 	var that = this,
 		o = that.o,
 		callbackFn = o.callbackFn,
@@ -784,55 +784,55 @@ _.request = function(q) {
 		onError = o.onError,
 		onRequest = o.onRequest,
 		callback = that.callback,
-		
+
 		url = o.url,
 		customUrl = o.customUrl,
 		para = o.requestParas,
 		ret = [],
 		k, li;
-		
+
 	//callback by callbackFn(switch the that'ref)
 	//if(callbackFn) (li = namespace(callbackFn)).repeat && (li.context = that);
 	if(callbackFn) {
 		var context = namespace(callbackFn),
 			lastFnName = callbackFn.split(".").pop();
-		
+
 		//重新注册callback，有可能callbackFn被动态改变了
 		context[lastFnName] = that.callback;
 		if(context[lastFnName].repeat) {
 			context[lastFnName].context = that;
 		}
 	}
-	
+
 	//callback by onload state
 	else if(callbackName) {
 		li = that.script;
-		
+
 		//IE
 		if(li.readyState){
 			li.onreadystatechange = function(){
 				if(li.readyState == "loaded" || li.readyState == "complete"){
 					li.onreadystatechange = NULL;
-					
+
 					onSucess && onSucess.call(that);
 					callback(callbackName);
 				}
 			};
 		}
-		
+
 		//Others
-		else {  
+		else {
 			li.onload = function(){
 				onSucess && onSucess.call(that);
 				callback(callbackName);
 			};
 		}
 	}
-	
+
 	onError && (that.script.onerror = function(){
 		onError.call(that);
 	});
-	
+
 	//creat new script or replace(nonIE and IE9 will not send request when change url)
 	if(!that.script || !isIE || isIE9) {
 		var ref = DOC.getElementsByTagName('script')[0];
@@ -840,28 +840,28 @@ _.request = function(q) {
 		li = DOC.createElement("script");
 		li.type = "text/javascript";
 		li.async = true;
-		
+
 		if(that.script) {
 			ref.parentNode.replaceChild(li, that.script);
 		}
-		
+
 		else {
 			ref.parentNode.insertBefore(li, ref);
 		}
 		that.script = li;
 	}
-	
+
 	//may modify this.o.requestParas or this.o.url before request
 	onRequest && onRequest.call(this);
-	
+
 	para = function() {
 		for(k in para) ((li = para[k]) !== undef) && ret.push(k + '=' + para[k]);
-		
+
 		//增加时间戳
 		o.t && ret.push("t" + '=' + +new Date)
 		return ret.join("&");
 	}();
-	
+
 	//charset可能动态设置
 	//o.charset && (that.script.charset = o.charset);
 	that.script.charset = o.charset ? o.charset : "";
