@@ -1,0 +1,15 @@
+{
+  "name": "suggest",
+  "version": "1.0.1",
+  "authors": [
+    "yuji <yuji@baidu.com>"
+  ],
+  "description": "suggest",
+  "keywords": [],
+  "license": "MIT",
+  "homepage": "http://gitlab.pro/common-ui/suggest",
+  "ignore": [
+    "**/*",
+    "!src/**"
+  ]
+}
