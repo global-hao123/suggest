@@ -48,7 +48,7 @@
 		sTimer = 0,
 		sTpl = '当前项序号:<em>#{i}</em>当前项内容:<em>#{s}</em>关键词:<em>#{q}</em><br>定时器状态:<em>#{t}</em>是否隐藏(提示层内容未重置):<em>#{isHide}</em>上/下键速度:<em>#{pressDelay}</em><br>缓存数据:<em>#{cache}</em>',
 		
-		testSug = G.sug("testSearchInput", {
+		testSug = sug("testSearchInput", {
 			classNameQuery: "sug-query",
 			classNameQueryNull: "sug-querynull",
 			charset: "gbk",

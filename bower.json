@@ -10,6 +10,7 @@
   "homepage": "http://gitlab.pro/common-ui/suggest",
   "ignore": [
     "**/*",
-    "!src/**"
+    "!src/**",
+    "!dist/**"
   ]
 }

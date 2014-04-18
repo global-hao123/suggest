@@ -32,8 +32,9 @@ update:
 
 7. 参考google增加策略：持续按上/下键时延迟响应和按ESC关闭后通过上/下键可以打开并保持选择项
 */
-
-;;(function(WIN, DOC, undef) {
+var WIN = window
+	, DOC = document
+	, undef;
 
 //fastst trim, form: http://blog.stevenlevithan.com/archives/faster-trim-javascript
 "".trim || (String.prototype.trim = function() {
@@ -869,6 +870,9 @@ _.request = function(q) {
 }
 
 //copy to G.sug
-WIN.G || (WIN.G = {}), G.suggest = G.sug = _sug;
+// WIN.G || (WIN.G = {}), G.suggest = G.sug = _sug;
 
-})(window, document);
+// support fis / AMD
+
+if(typeof module !== "undefined" && typeof module.exports !== "undefined") module.exports = _sug;
+else return _sug;
